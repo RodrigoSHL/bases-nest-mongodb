@@ -3,13 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { catchError, firstValueFrom } from 'rxjs';
 import { PokeapiResponse } from './interfaces/pokeapi-response.interface';
 import { AxiosError } from 'axios';
-import { PokemonService } from 'src/pokemon/pokemon.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Pokemon } from 'src/pokemon/entities/pokemon.entity';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class SeedService {
   constructor(
     private readonly httpService: HttpService,
-    private readonly pokemonService: PokemonService,
+    @InjectModel(Pokemon.name)
+    private readonly pokemonModel: Model<Pokemon>,
   ) {}
   async executeSeed() {
     const { data } = await firstValueFrom(
@@ -27,8 +30,8 @@ export class SeedService {
       const segments = result.url.split('/');
       const name = result.name;
       const no = +segments[segments.length - 2];
-      this.pokemonService.create({ name, no, type: 'normal' });
+      this.pokemonModel.create({ name, no });
     });
-    return data;
+    return 'Seed executed!';
   }
 }
