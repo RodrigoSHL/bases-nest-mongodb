@@ -1,16 +1,14 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { catchError, firstValueFrom } from 'rxjs';
 import { PokeapiResponse } from './interfaces/pokeapi-response.interface';
-import { AxiosError } from 'axios';
 import { InjectModel } from '@nestjs/mongoose';
 import { Pokemon } from 'src/pokemon/entities/pokemon.entity';
 import { Model } from 'mongoose';
+import { AxiosAdapter } from 'src/common/adapters/axios.adapter';
 
 @Injectable()
 export class SeedService {
   constructor(
-    private readonly httpService: HttpService,
+    private readonly http: AxiosAdapter,
     @InjectModel(Pokemon.name)
     private readonly pokemonModel: Model<Pokemon>,
   ) {}
@@ -18,15 +16,8 @@ export class SeedService {
   async executeSeed() {
     await this.pokemonModel.deleteMany({});
 
-    const { data } = await firstValueFrom(
-      this.httpService
-        .get<PokeapiResponse>('https://pokeapi.co/api/v2/pokemon?limit=650')
-        .pipe(
-          catchError((error: AxiosError) => {
-            console.error(error.response.data);
-            throw 'An error happened!';
-          }),
-        ),
+    const data = await this.http.get<PokeapiResponse>(
+      'https://pokeapi.co/api/v2/pokemon?limit=650',
     );
 
     const pokemonToInsert: { name: string; no: number }[] = [];
