@@ -18,9 +18,9 @@ export class PokemonService {
   constructor(
     @InjectModel(Pokemon.name)
     private readonly pokemonModel: Model<Pokemon>,
-    private readonly congigService: ConfigService,
+    private readonly configService: ConfigService,
   ) {
-    this.defaultLimit = congigService.get<number>('defaultLimit');
+    this.defaultLimit = configService.get<number>('defaultLimit');
   }
 
   async create(createPokemonDto: CreatePokemonDto) {
